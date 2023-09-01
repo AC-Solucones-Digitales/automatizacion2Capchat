@@ -18,7 +18,7 @@ mydb = mysql.connector.connect(
 
 
 c=mydb.cursor()
-c.execute("SELECT * FROM documentos LIMIT 100 OFFSET 400")
+c.execute("SELECT * FROM documentos LIMIT 100")
 result_set = c.fetchall()
 firefox_profile = webdriver.FirefoxProfile()
 firefox_profile.set_preference("browser.privatebrowsing.autostart", True)
@@ -51,8 +51,8 @@ for row in result_set:
             # val2 = (niup[0].text)
             mycursor.execute(sql2, (niup[0].text,))
             mydb.commit()
-        time.sleep(40)
+        time.sleep(60)
     except:
         print("el proceso fallo")
-        time.sleep(40)
+        time.sleep(60)
     d.close()
