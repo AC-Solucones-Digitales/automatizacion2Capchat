@@ -24,7 +24,6 @@ playwright-recaptcha==0.3.2
 protobuf==4.21.12
 pydub==0.25.1
 pyee==9.0.4
-Pygments @ file:///private/tmp/pygments-20230708-60144-1sqffhw/Pygments-2.15.1
 PySocks==1.7.1
 pytesseract==0.3.10
 python-dateutil==2.8.2
