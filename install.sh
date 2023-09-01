@@ -5,4 +5,4 @@ apt install ffmpeg -y
 
 pip3 install --no-cache-dir -r requirements.txt
 
-python3 scrapper.py
+python3 scrapper2.py
