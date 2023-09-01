@@ -18,7 +18,7 @@ mydb = mysql.connector.connect(
 
 
 c=mydb.cursor()
-c.execute("SELECT * FROM documentos LIMIT 100")
+c.execute("SELECT * FROM documentos LIMIT 30")
 result_set = c.fetchall()
 
 for row in result_set:
