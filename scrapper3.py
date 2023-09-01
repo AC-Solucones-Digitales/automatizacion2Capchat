@@ -54,5 +54,5 @@ for row in result_set:
         time.sleep(40)
     except:
         print("el proceso fallo")
-        time.sleep(120)
+        time.sleep(40)
     d.close()
