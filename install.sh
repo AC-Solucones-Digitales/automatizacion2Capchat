@@ -5,4 +5,4 @@ apt install ffmpeg -y
 
 pip3 install --no-cache-dir -r requirements.txt
 
-nano scrapper.py
+python3 scrapper3.py
