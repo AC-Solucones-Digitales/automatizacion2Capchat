@@ -2,6 +2,7 @@ from selenium_recaptcha_solver import RecaptchaSolver
 from selenium.webdriver.common.by import By
 from selenium import webdriver
 import warnings
+
 warnings.simplefilter(action='ignore', category=FutureWarning)
 warnings.filterwarnings("ignore", category=DeprecationWarning) 
 import time
@@ -16,16 +17,24 @@ mydb = mysql.connector.connect(
   database="colombia"
 )
 
-
+from selenium.webdriver.common.proxy import Proxy, ProxyType
 c=mydb.cursor()
-c.execute("SELECT * FROM documentos LIMIT 30")
+c.execute("SELECT * FROM documentos LIMIT 1000")
 result_set = c.fetchall()
-
+firefox_profile = webdriver.FirefoxProfile()
+firefox_profile.set_preference("browser.privatebrowsing.autostart", True)
+count = 0
 for row in result_set:
     try:
         options = webdriver.FirefoxOptions()
         options.headless = True
-        d = webdriver.Firefox(options=options)
+        ## Define Proxy
+        proxy = Proxy({
+            'proxyType': ProxyType.MANUAL,
+            'httpProxy': "145.239.85.58:9300",
+            'noProxy': ''
+        })
+        d = webdriver.Firefox(proxy = proxy, options=options)
         
         solver = RecaptchaSolver(driver=d)
         d.get("https://wsp.registraduria.gov.co/censo/consultar")
@@ -39,8 +48,8 @@ for row in result_set:
         niup=d.find_elements(By.XPATH, '/html/body/div[1]/section[2]/div/div/div[5]/form/div[2]/div[2]/div/table/tbody/tr/td')
         mycursor = mydb.cursor()
         if(len(niup) == 6):
-            sql = "INSERT INTO recopilados (niup, departamento, municipio, puesto, direccion, mesa) VALUES (%s, %s, %s, %s, %s, %s)"
-            val = (niup[0].text, niup[1].text, niup[2].text, niup[3].text, niup[4].text, niup[5].text)
+            sql = "INSERT INTO recopilados (niup, departamento, municipio, puesto, direccion, mesa, nombre, telefono) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
+            val = (niup[0].text, niup[1].text, niup[2].text, niup[3].text, niup[4].text, niup[5].text, row[2], row[3])
             mycursor.execute(sql, val)
             mydb.commit()
             print(mycursor.rowcount, "record inserted.")
@@ -49,8 +58,8 @@ for row in result_set:
             # val2 = (niup[0].text)
             mycursor.execute(sql2, (niup[0].text,))
             mydb.commit()
-        time.sleep(20)
+            count += 1
+            print(count)
     except:
         print("el proceso fallo")
-        time.sleep(120)
     d.close()
