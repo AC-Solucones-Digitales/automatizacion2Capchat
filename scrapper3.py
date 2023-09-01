@@ -51,8 +51,6 @@ for row in result_set:
             # val2 = (niup[0].text)
             mycursor.execute(sql2, (niup[0].text,))
             mydb.commit()
-            count += 1
-            print(count)
         time.sleep(40)
     except:
         print("el proceso fallo")
