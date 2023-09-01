@@ -27,7 +27,7 @@ for row in result_set:
     try:
         options = webdriver.FirefoxOptions()
         options.headless = True
-        d = webdriver.Firefox(firefox_profile=firefox_profile)
+        d = webdriver.Firefox(options=options)
         
         solver = RecaptchaSolver(driver=d)
         d.get("https://wsp.registraduria.gov.co/censo/consultar")
