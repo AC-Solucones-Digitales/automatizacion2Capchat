@@ -1,6 +1,5 @@
 from selenium_recaptcha_solver import RecaptchaSolver
 from selenium.webdriver.common.by import By
-from zyte_smartproxy_selenium import webdriver
 from selenium import webdriver
 import warnings
 
