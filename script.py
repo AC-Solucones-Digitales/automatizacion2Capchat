@@ -1,10 +1,7 @@
-from selenium_recaptcha_solver import RecaptchaSolver
 from selenium.webdriver.common.by import By
 from selenium import webdriver
-import warnings
-
-
 from twocaptcha import TwoCaptcha
+
 # Base de datos
 import mysql.connector
 
@@ -16,12 +13,15 @@ mydb = mysql.connector.connect(
 )
 
 c=mydb.cursor()
-c.execute("SELECT * FROM documentos WHERE id > 1000")
+c.execute("SELECT * FROM documentos2 WHERE id > 600 AND id < 900")
 result_set = c.fetchall()
 count = 0
 for row in result_set:
     try:
-        d = webdriver.Firefox()
+        print(row[0])
+        options = webdriver.FirefoxOptions()
+        options.add_argument("--headless")
+        d = webdriver.Firefox(options=options)
         d.get("https://wsp.registraduria.gov.co/censo/consultar")
         placa = d.find_element(By.ID, 'nuip')
         placa.send_keys(row[1])
@@ -44,20 +44,17 @@ for row in result_set:
             val = (niup[0].text, niup[1].text, niup[2].text, niup[3].text, niup[4].text, niup[5].text, row[2], row[3])
             mycursor.execute(sql, val)
             mydb.commit()
-            # cursor2 = mydb.cursor()
-            sql2 = "DELETE FROM documentos WHERE documento = %s"
-            # val2 = (niup[0].text)
+            sql2 = "DELETE FROM documentos2 WHERE documento = %s"
             mycursor.execute(sql2, (row[1],))
             mydb.commit()
             count += 1
             print(count)
         else:
-            sql2 = "DELETE FROM documentos WHERE documento = %s"
+            sql2 = "DELETE FROM documentos2 WHERE documento = %s"
             mycursor.execute(sql2, (row[1],))
             mydb.commit()
         d.close()
             
     except:
         print("el proceso fallo")
-        # proxie = random.choice(salida)
         d.close()
