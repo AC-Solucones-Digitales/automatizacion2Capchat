@@ -13,7 +13,7 @@ mydb = mysql.connector.connect(
 )
 
 c=mydb.cursor()
-c.execute("SELECT * FROM documentos2 WHERE id > 600 AND id < 900")
+c.execute("SELECT * FROM documentos3 WHERE id > 600 AND id < 900")
 result_set = c.fetchall()
 count = 0
 for row in result_set:
@@ -44,13 +44,13 @@ for row in result_set:
             val = (niup[0].text, niup[1].text, niup[2].text, niup[3].text, niup[4].text, niup[5].text, row[2], row[3])
             mycursor.execute(sql, val)
             mydb.commit()
-            sql2 = "DELETE FROM documentos2 WHERE documento = %s"
+            sql2 = "DELETE FROM documentos3 WHERE documento = %s"
             mycursor.execute(sql2, (row[1],))
             mydb.commit()
             count += 1
             print(count)
         else:
-            sql2 = "DELETE FROM documentos2 WHERE documento = %s"
+            sql2 = "DELETE FROM documentos3 WHERE documento = %s"
             mycursor.execute(sql2, (row[1],))
             mydb.commit()
         d.close()
