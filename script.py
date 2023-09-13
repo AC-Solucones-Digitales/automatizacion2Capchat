@@ -1,12 +1,11 @@
 from selenium_recaptcha_solver import RecaptchaSolver
 from selenium.webdriver.common.by import By
+from zyte_smartproxy_selenium import webdriver
 from selenium import webdriver
 import warnings
 
-warnings.simplefilter(action='ignore', category=FutureWarning)
-warnings.filterwarnings("ignore", category=DeprecationWarning) 
-import time
 
+from twocaptcha import TwoCaptcha
 # Base de datos
 import mysql.connector
 
@@ -17,49 +16,49 @@ mydb = mysql.connector.connect(
   database="colombia"
 )
 
-from selenium.webdriver.common.proxy import Proxy, ProxyType
 c=mydb.cursor()
-c.execute("SELECT * FROM documentos LIMIT 1000")
+c.execute("SELECT * FROM documentos WHERE id > 1000")
 result_set = c.fetchall()
-firefox_profile = webdriver.FirefoxProfile()
-firefox_profile.set_preference("browser.privatebrowsing.autostart", True)
 count = 0
 for row in result_set:
     try:
-        options = webdriver.FirefoxOptions()
-        options.headless = True
-        ## Define Proxy
-        proxy = Proxy({
-            'proxyType': ProxyType.MANUAL,
-            'httpProxy': "145.239.85.58:9300",
-            'noProxy': ''
-        })
-        d = webdriver.Firefox(proxy = proxy, options=options)
-        
-        solver = RecaptchaSolver(driver=d)
+        d = webdriver.Firefox()
         d.get("https://wsp.registraduria.gov.co/censo/consultar")
         placa = d.find_element(By.ID, 'nuip')
         placa.send_keys(row[1])
-        recaptcha_iframe = d.find_element(By.XPATH, '//iframe[@title="reCAPTCHA"]')
-        solver.click_recaptcha_v2(iframe=recaptcha_iframe)
+        # Solve the Captcha
+        solver = TwoCaptcha("3ad74949feb3c5dad4345026c58d1033")
+        response = solver.recaptcha(sitekey='6LcthjAgAAAAAFIQLxy52074zanHv47cIvmIHglH', url='https://wsp.registraduria.gov.co/censo/consultar')
+        code = response['code']
+
+        # Set the solved Captcha
+        recaptcha_response_element = d.find_element(By.ID, 'g-recaptcha-response')
+        d.execute_script(f'arguments[0].value = "{code}";', recaptcha_response_element)
+        
         boton=d.find_element(By.NAME, "enviar");
         d.execute_script("arguments[0].click();", boton)
-        d.implicitly_wait(2)
+        d.implicitly_wait(1)
         niup=d.find_elements(By.XPATH, '/html/body/div[1]/section[2]/div/div/div[5]/form/div[2]/div[2]/div/table/tbody/tr/td')
         mycursor = mydb.cursor()
-        if(len(niup) == 6):
+        if(len(niup) >= 6):
             sql = "INSERT INTO recopilados (niup, departamento, municipio, puesto, direccion, mesa, nombre, telefono) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
             val = (niup[0].text, niup[1].text, niup[2].text, niup[3].text, niup[4].text, niup[5].text, row[2], row[3])
             mycursor.execute(sql, val)
             mydb.commit()
-            print(mycursor.rowcount, "record inserted.")
             # cursor2 = mydb.cursor()
             sql2 = "DELETE FROM documentos WHERE documento = %s"
             # val2 = (niup[0].text)
-            mycursor.execute(sql2, (niup[0].text,))
+            mycursor.execute(sql2, (row[1],))
             mydb.commit()
             count += 1
             print(count)
+        else:
+            sql2 = "DELETE FROM documentos WHERE documento = %s"
+            mycursor.execute(sql2, (row[1],))
+            mydb.commit()
+        d.close()
+            
     except:
         print("el proceso fallo")
-    d.close()
+        # proxie = random.choice(salida)
+        d.close()
